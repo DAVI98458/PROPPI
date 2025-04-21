@@ -1,0 +1,130 @@
+-- lib
+local Library = loadstring(game:HttpGet("https://raw.githubusercontent.com/xHeptc/Kavo-UI-Library/main/source.lua"))()
+
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui", player:WaitForChild("PlayerGui"))
+gui.Name = "GojoMenu"
+gui.ResetOnSpawn = false
+
+-- Menu Frame
+local frame = Instance.new("Frame", gui)
+frame.Size = UDim2.new(0, 300, 0, 380)
+frame.Position = UDim2.new(0, 10, 0.5, -190)
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+frame.Visible = true
+
+-- Título
+local title = Instance.new("TextLabel", frame)
+title.Size = UDim2.new(1, 0, 0, 35)
+title.BackgroundTransparency = 1
+title.Text = "Created by @lindao_gojo(beta)"
+title.TextColor3 = Color3.new(1,1,1)
+title.Font = Enum.Font.SourceSansBold
+title.TextSize = 18
+
+-- Botão Anti-Cheat (Placeholder visual)
+local antiCheat = Instance.new("TextButton", frame)
+antiCheat.Size = UDim2.new(1, -20, 0, 30)
+antiCheat.Position = UDim2.new(0, 10, 0, 45)
+antiCheat.Text = "Anti-Cheat (Ativado)"
+antiCheat.BackgroundColor3 = Color3.fromRGB(50, 100, 50)
+antiCheat.TextColor3 = Color3.new(1,1,1)
+antiCheat.Font = Enum.Font.SourceSans
+antiCheat.TextSize = 16
+
+-- ESP Funcional
+local espEnabled = true
+function createESP(target)
+	local box = Instance.new("BillboardGui", target:WaitForChild("Head"))
+	box.Size = UDim2.new(0, 100, 0, 30)
+	box.AlwaysOnTop = true
+	box.Name = "ESPLabel"
+
+	local text = Instance.new("TextLabel", box)
+	text.Size = UDim2.new(1, 0, 1, 0)
+	text.BackgroundTransparency = 1
+	text.Font = Enum.Font.SourceSansBold
+	text.TextSize = 14
+	text.TextColor3 = Color3.new(1,0,0)
+	text.TextStrokeTransparency = 0.5
+	text.Name = "Text"
+
+	game:GetService("RunService").RenderStepped:Connect(function()
+		if espEnabled and text and target and target:FindFirstChild("HumanoidRootPart") then
+			local distance = math.floor((player.Character.HumanoidRootPart.Position - target.HumanoidRootPart.Position).Magnitude)
+			local teamColor = target.Team == player.Team and Color3.fromRGB(0, 150, 255) or Color3.fromRGB(255, 50, 50)
+			text.TextColor3 = teamColor
+			text.Text = "[" .. target.Name .. "] - " .. distance .. "m"
+		end
+	end)
+end
+
+for _, p in pairs(game.Players:GetPlayers()) do
+	if p ~= player and p.Character then
+		createESP(p)
+	end
+end
+
+game.Players.PlayerAdded:Connect(function(p)
+	p.CharacterAdded:Connect(function()
+		wait(1)
+		createESP(p)
+	end)
+end)
+
+-- Chat Bypasser
+local chatLabel = Instance.new("TextLabel", frame)
+chatLabel.Size = UDim2.new(1, -20, 0, 20)
+chatLabel.Position = UDim2.new(0, 10, 0, 90)
+chatLabel.Text = "Chat Bypasser:"
+chatLabel.BackgroundTransparency = 1
+chatLabel.TextColor3 = Color3.new(1,1,1)
+chatLabel.Font = Enum.Font.SourceSans
+chatLabel.TextSize = 16
+chatLabel.TextXAlignment = Enum.TextXAlignment.Left
+
+local chatBox = Instance.new("TextBox", frame)
+chatBox.Size = UDim2.new(1, -20, 0, 30)
+chatBox.Position = UDim2.new(0, 10, 0, 115)
+chatBox.PlaceholderText = "Digite sua mensagem"
+chatBox.Text = ""
+chatBox.TextColor3 = Color3.new(1,1,1)
+chatBox.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+chatBox.Font = Enum.Font.SourceSans
+chatBox.TextSize = 16
+chatBox.ClearTextOnFocus = false
+
+local sendBtn = Instance.new("TextButton", frame)
+sendBtn.Size = UDim2.new(1, -20, 0, 30)
+sendBtn.Position = UDim2.new(0, 10, 0, 150)
+sendBtn.Text = "Enviar Mensagem"
+sendBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+sendBtn.TextColor3 = Color3.new(1,1,1)
+sendBtn.Font = Enum.Font.SourceSans
+sendBtn.TextSize = 16
+
+sendBtn.MouseButton1Click:Connect(function()
+	local msg = chatBox.Text
+	if msg ~= "" then
+		local safe = msg:gsub("a", "𝗮"):gsub("e", "𝗲"):gsub("i", "𝗶"):gsub("o", "𝗼"):gsub("u", "𝘂")
+		local chat = game:GetService("ReplicatedStorage"):WaitForChild("DefaultChatSystemChatEvents"):FindFirstChild("SayMessageRequest")
+		if chat then
+			chat:FireServer(safe, "All")
+		end
+	end
+end)
+
+-- Botão de abrir/fechar menu
+local toggle = Instance.new("TextButton", gui)
+toggle.Size = UDim2.new(0, 130, 0, 35)
+toggle.Position = UDim2.new(0, 10, 0, 10)
+toggle.Text = "Fechar Menu"
+toggle.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
+toggle.TextColor3 = Color3.new(1,1,1)
+toggle.Font = Enum.Font.SourceSansBold
+toggle.TextSize = 16
+
+toggle.MouseButton1Click:Connect(function()
+	frame.Visible = not frame.Visible
+	toggle.Text = frame.Visible and "Fechar Menu" or "Abrir Menu"
+end)
